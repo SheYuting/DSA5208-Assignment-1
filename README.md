@@ -653,7 +653,7 @@ ALL
 maintains strong consistency, but is bottlenecked by the slowest replica.
 
 This scenario illustrates the fundamental trade-off between query latency and consistency in distributed databases.
----
+
 
 
 
