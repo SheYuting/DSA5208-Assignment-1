@@ -603,8 +603,10 @@ First ensure that all three nodes are healthy.
 Run:
 
 ```powershell
-python consistency_suite_fixed.py --scenario partition --trials 30 --output results/latency.csv
+python consistency_suite_fixed.py --scenario node-latency --trials 30
 ```
+
+The results will automatically save to results/latency.csv.
 
 The program first creates baseline data while all replicas are available.
 
