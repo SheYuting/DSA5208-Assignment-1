@@ -16,6 +16,7 @@ The experiments compare several Cassandra consistency-level configurations under
 1. Normal operation
 2. Node failure
 3. Network partition
+4. Network Latency
 
 The Cassandra cluster consists of three Docker containers with a replication factor of 3.
 
@@ -34,11 +35,17 @@ DSA5208-Assignment-1/
 ├── partition_cass3.ps1
 ├── heal_partition.ps1
 ├── check_cluster.ps1
+├── inject_latency.ps1
+├── fix_latency.ps1
+
 │
 ├── results/
 │   ├── normal.csv
 │   ├── node_failure.csv
 │   └── partition.csv
+│   └── latency.csv
+
+
 │
 └── README.md
 ```
@@ -587,8 +594,73 @@ Then verify recovery:
 ```
 
 ---
+# 7. Network Latency
+ 
+The network latency experiment simulates real-world network degradation and asymmetrical node delay.
 
-# 7. Output
+First ensure that all three nodes are healthy.
+
+Run:
+
+```powershell
+python consistency_suite_fixed.py --scenario partition --trials 30 --output results/latency.csv
+```
+
+The program first creates baseline data while all replicas are available.
+
+It then pauses with a message similar to:
+
+```text
+BASELINE READY. Inject the network partition now.
+Press ENTER after the fault/partition is active...
+```
+
+Open another PowerShell terminal and execute:
+
+```powershell
+.\inject_latency.ps1
+```
+
+This applies a 500ms delay to cass3.
+
+Return to the Python experiment and press Enter.
+
+After the experiment, fix the latency by running:
+
+```powershell
+.\fix_latency.ps1
+```
+
+### Expected Behaviour
+
+With one node unavailable and replication factor 3:
+
+```text
+ONE
+```
+
+suffers heavy consistency breaches.
+
+```text
+QUORUM
+```
+
+maintains strong consistency with zero latency impact, provided queries contact fast replicas.
+```text
+ALL
+```
+
+maintains strong consistency, but is bottlenecked by the slowest replica.
+
+This scenario illustrates the fundamental trade-off between query latency and consistency in distributed databases.
+---
+
+
+
+
+---
+
+# 8. Output
 
 Each experiment produces a CSV file.
 
@@ -599,6 +671,7 @@ results/
 ├── normal.csv
 ├── node_failure.csv
 └── partition.csv
+└── latency.csv
 ```
 
 Important CSV fields include:
