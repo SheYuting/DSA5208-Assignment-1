@@ -918,7 +918,13 @@ def print_node_identities(nodes):
 def run_suite(args):
     configs = parse_configs(args.configs)
     run_id = args.run_id or uuid.uuid4().hex[:12]
-    output_path = Path(args.output)
+    if args.output is None:
+        if args.scenario == "node-latency":
+            output_path = Path("results/latency.csv")
+        else:
+            output_path = Path("results/consistency_results.csv")
+    else:
+        output_path = Path(args.output)
 
     nodes = {}
     all_results = []
@@ -1048,7 +1054,7 @@ def build_parser():
     )
     p.add_argument(
         "--scenario",
-        choices=["normal", "node-failure", "partition"],
+        choices=["normal", "node-failure", "partition","node-latency"],
         default="normal",
         help="Fault scenario to test",
     )
@@ -1068,8 +1074,9 @@ def build_parser():
     )
     p.add_argument(
         "--output",
-        default="results/consistency_results.csv",
-        help="CSV output path",
+        # SET DEFAULT TO None SO WE CAN INFER IT DYNAMICALLY
+        default=None,
+        help="CSV output path (default: results/latency.csv for node-latency, results/consistency_results.csv otherwise)",
     )
     p.add_argument(
         "--run-id",
