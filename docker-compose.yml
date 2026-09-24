@@ -57,3 +57,5 @@ services:
       - cass1
     networks:
       - cass-net
+    cap_add:
+      - NET_ADMIN
