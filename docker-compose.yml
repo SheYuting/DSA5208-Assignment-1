@@ -1,5 +1,3 @@
-
-
 networks:
   cass-net:
     driver: bridge
@@ -11,14 +9,30 @@ services:
     hostname: cass1
     ports:
       - "9042:9042"
+
     environment:
       - CASSANDRA_CLUSTER_NAME=TestCluster
+      - CASSANDRA_SEEDS=cass1
       - CASSANDRA_DC=dc1
       - CASSANDRA_ENDPOINT_SNITCH=GossipingPropertyFileSnitch
       - MAX_HEAP_SIZE=256M
       - HEAP_NEWSIZE=50M
+
+    healthcheck:
+      test: ["CMD-SHELL", "cqlsh 127.0.0.1 9042 -e 'DESCRIBE CLUSTER' >/dev/null 2>&1 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
+
+    restart: unless-stopped
+
     networks:
       - cass-net
+
+    cap_add:
+      - NET_ADMIN
+
 
   cass2:
     image: cassandra:4.1
@@ -26,6 +40,7 @@ services:
     hostname: cass2
     ports:
       - "9043:9042"
+
     environment:
       - CASSANDRA_CLUSTER_NAME=TestCluster
       - CASSANDRA_SEEDS=cass1
@@ -33,12 +48,26 @@ services:
       - CASSANDRA_ENDPOINT_SNITCH=GossipingPropertyFileSnitch
       - MAX_HEAP_SIZE=256M
       - HEAP_NEWSIZE=50M
+
     depends_on:
-      - cass1
+      cass1:
+        condition: service_healthy
+
+    healthcheck:
+      test: ["CMD-SHELL", "cqlsh 127.0.0.1 9042 -e 'DESCRIBE CLUSTER' >/dev/null 2>&1 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
+
+    restart: unless-stopped
+
     networks:
       - cass-net
+
     cap_add:
       - NET_ADMIN
+
 
   cass3:
     image: cassandra:4.1
@@ -46,6 +75,7 @@ services:
     hostname: cass3
     ports:
       - "9044:9042"
+
     environment:
       - CASSANDRA_CLUSTER_NAME=TestCluster
       - CASSANDRA_SEEDS=cass1
@@ -53,9 +83,22 @@ services:
       - CASSANDRA_ENDPOINT_SNITCH=GossipingPropertyFileSnitch
       - MAX_HEAP_SIZE=256M
       - HEAP_NEWSIZE=50M
+
     depends_on:
-      - cass1
+      cass1:
+        condition: service_healthy
+
+    healthcheck:
+      test: ["CMD-SHELL", "cqlsh 127.0.0.1 9042 -e 'DESCRIBE CLUSTER' >/dev/null 2>&1 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
+
+    restart: unless-stopped
+
     networks:
       - cass-net
+
     cap_add:
       - NET_ADMIN
